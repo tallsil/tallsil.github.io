@@ -3,629 +3,354 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自定义颜色面板（可删可加/6列/色系分类）</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Microsoft YaHei", sans-serif;
+    <title>TALLSI 图文广告·高端印刷设计一站式服务</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        dark: '#1D2939',
+                        graySoft: '#F2F4F7'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
         }
-        body {
-            background-color: #f5f5f5;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 30px auto;
-            padding: 0 10px;
-        }
-        h1 {
-            font-size: 20px;
-            margin-bottom: 20px;
-            color: #333;
-            text-align: center;
-        }
-        /* 顶部操作区（固定） */
-        .top-area {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 15px;
-        }
-        /* 色系分类栏 */
-        .category-filter {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-        .category-btn {
-            padding: 6px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: #f8f9fa;
-            color: #333;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-        .category-btn.active {
-            background-color: #409eff;
-            color: white;
-            border-color: #409eff;
-        }
-        .category-btn:hover {
-            background-color: #e9ecef;
-        }
-        .category-btn.active:hover {
-            background-color: #66b1ff;
-        }
-        /* 取色器+输入+添加区 */
-        .picker-search-add-area {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        #colorPicker {
-            width: 50px;
-            height: 50px;
-            border: none;
-            cursor: pointer;
-            background-color: transparent;
-        }
-        .input-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        #colorInput {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            font-family: "Consolas", monospace;
-            width: 150px;
-        }
-        #colorInput:focus {
-            outline: none;
-            border-color: #409eff;
-        }
-        #searchBtn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
-            background-color: #409eff;
-            color: white;
-            cursor: pointer;
-        }
-        #addBtn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
-            background-color: #67c23a;
-            color: white;
-            cursor: pointer;
-        }
-        .picker-result {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        #selectedColorCode {
-            font-size: 14px;
-            font-family: "Consolas", monospace;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            min-width: 120px;
-            text-align: center;
-        }
-        #copyBtn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
-            background-color: #13ce66;
-            color: white;
-            cursor: pointer;
-        }
-        .tips {
-            font-size: 12px;
-            color: #999;
-            text-align: center;
-            margin-top: 10px;
-        }
-        .error-tip {
-            font-size: 12px;
-            color: #f56c6c;
-            text-align: center;
-            margin-top: 8px;
-            display: none;
-        }
-        /* 颜色块滚动容器 */
-        .color-scroll-container {
-            height: 500px;
-            overflow-y: auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        /* 6列网格布局 */
-        .color-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 15px;
-        }
-        /* 颜色卡片（带删除按钮） */
-        .color-item {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            padding: 10px;
-            border-radius: 4px;
-            background-color: #f8f9fa;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .color-item:hover {
-            background-color: #e9ecef;
-            transform: translateY(-2px);
-        }
-        .color-item.highlight {
-            border: 2px solid #409eff;
-            background-color: #f0f8ff;
-        }
-        /* 删除按钮（悬浮显示） */
-        .del-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            width: 18px;
-            height: 18px;
-            line-height: 16px;
-            text-align: center;
-            background-color: #f56c6c;
-            color: white;
-            border-radius: 50%;
-            font-size: 12px;
-            cursor: pointer;
-            display: none;
-            z-index: 10;
-        }
-        .color-item:hover .del-btn {
-            display: block;
-        }
-        .color-block {
-            width: 64px;
-            height: 15px;
-            border: 1px solid #ccc;
-        }
-        .color-name {
-            font-size: 11px;
-            color: #666;
-            text-align: center;
-            max-width: 80px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .color-code {
-            font-size: 11px;
-            color: #333;
-            font-family: "Consolas", monospace;
-            text-align: center;
-        }
-        /* 滚动条美化 */
-        .color-scroll-container::-webkit-scrollbar {
-            width: 8px;
-        }
-        .color-scroll-container::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-        .color-scroll-container::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 4px;
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .shadow-card {
+                box-shadow: 0 8px 30px rgba(22, 93, 255, 0.08);
+            }
+            .text-gradient {
+                background: linear-gradient(90deg, #165DFF, #4080FF);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .hover-scale {
+                transition: all 0.3s ease;
+            }
+            .hover-scale:hover {
+                transform: translateY(-6px) scale(1.02);
+            }
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <h1>自定义颜色面板（可删可加/6列/色系分类）</h1>
-        
-        <!-- 顶部固定操作区 -->
-        <div class="top-area">
-            <!-- 色系分类筛选 -->
-            <div class="category-filter">
-                <button class="category-btn active" data-category="all">全部</button>
-                <button class="category-btn" data-category="red">红色系</button>
-                <button class="category-btn" data-category="green">绿色系</button>
-                <button class="category-btn" data-category="blue">蓝色系</button>
-                <button class="category-btn" data-category="yellow">黄色系</button>
-                <button class="category-btn" data-category="purple">紫色系</button>
-                <button class="category-btn" data-category="blackWhiteGray">黑/白/灰系</button>
-                <button class="category-btn" data-category="brownOrange">棕/橙色系</button>
-                <button class="category-btn" data-category="cyan">青/蓝绿系</button>
-            </div>
-            
-            <div class="picker-search-add-area">
-                <!-- 颜色吸管 -->
-                <input type="color" id="colorPicker" value="#FFFFFF">
-                
-                <!-- 颜色码输入+搜索+添加 -->
-                <div class="input-group">
-                    <input type="text" id="colorInput" placeholder="输入颜色码 #fff/ffffff">
-                    <button id="searchBtn">查找</button>
-                    <button id="addBtn">添加颜色</button>
-                </div>
-                
-                <!-- 选中结果+复制 -->
-                <div class="picker-result">
-                    <div id="selectedColorCode">#FFFFFF</div>
-                    <button id="copyBtn">复制</button>
-                </div>
-            </div>
-            
-            <div class="error-tip" id="errorTip">请输入有效的3位/6位颜色码（支持带#/不带#）</div>
-            <div class="tips">提示：悬浮颜色块显示删除按钮，输入颜色码可添加/查找</div>
+<body class="bg-white font-sans text-gray-700 overflow-x-hidden">
+    <!-- 导航栏 -->
+    <header class="fixed top-0 left-0 w-full bg-white/95 backdrop-blur-md z-50 shadow-sm">
+        <div class="container mx-auto px-4 md:px-8 py-4 flex justify-between items-center">
+            <a href="#" class="text-[28px] font-bold text-dark tracking-wider">
+                <span class="text-primary">TALL</span>SI
+            </a>
+            <nav class="hidden md:flex gap-8 text-[15px]">
+                <a href="#home" class="text-primary font-medium">首页</a>
+                <a href="#service" class="hover:text-primary transition-colors">产品服务</a>
+                <a href="#case" class="hover:text-primary transition-colors">案例展示</a>
+                <a href="#about" class="hover:text-primary transition-colors">关于我们</a>
+                <a href="#contact" class="hover:text-primary transition-colors">联系我们</a>
+            </nav>
+            <a href="#contact" class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-primary/90 transition-colors text-sm">
+                立即咨询
+            </a>
+            <button class="md:hidden text-dark text-xl">
+                <i class="fa fa-bars"></i>
+            </button>
         </div>
-        
-        <!-- 颜色块滚动容器 -->
-        <div class="color-scroll-container">
-            <div class="color-grid" id="colorGrid"></div>
+    </header>
+
+    <!-- 首屏Banner -->
+    <section id="home" class="pt-[100px] bg-gradient-to-br from-graySoft to-white min-h-[650px] flex items-center">
+        <div class="container mx-auto px-4 md:px-8 grid md:grid-cols-2 gap-12 items-center">
+            <div>
+                <span class="inline-block bg-primary/10 text-primary px-3 py-1 rounded text-sm mb-4">高端图文印刷 · 品牌视觉定制</span>
+                <h1 class="text-[42px] md:text-[56px] font-bold text-dark leading-tight mb-6">
+                    TALLSI 图文<br>
+                    <span class="text-gradient">一站式广告印刷解决方案</span>
+                </h1>
+                <p class="text-gray-500 text-[17px] leading-relaxed mb-8 max-w-xl">
+                    商业印刷、画册海报、标书装订、门头广告、VI品牌设计、文创定制，精工出品，极速交付，为企业打造专业视觉物料。
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="#service" class="bg-primary text-white px-7 py-3.5 rounded-lg hover:shadow-lg hover:shadow-primary/20 transition-all">
+                        浏览全部产品
+                    </a>
+                    <a href="#case" class="border border-primary text-primary px-7 py-3.5 rounded-lg hover:bg-primary/5 transition-all">
+                        查看精选案例
+                    </a>
+                </div>
+                <div class="flex gap-10 mt-10">
+                    <div>
+                        <h3 class="text-[30px] font-bold text-dark">12+</h3>
+                        <p class="text-gray-400">行业服务经验</p>
+                    </div>
+                    <div>
+                        <h3 class="text-[30px] font-bold text-dark">6000+</h3>
+                        <p class="text-gray-400">企业合作客户</p>
+                    </div>
+                    <div>
+                        <h3 class="text-[30px] font-bold text-dark">99.6%</h3>
+                        <p class="text-gray-400">客户好评率</p>
+                    </div>
+                </div>
+            </div>
+            <div class="rounded-2xl overflow-hidden shadow-card">
+                <img src="https://img1.baidu.com/it/u=1982652320,3792503233&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=500" alt="图文印刷高端场景" class="w-full h-full object-cover">
+            </div>
         </div>
-    </div>
+    </section>
 
-    <script>
-        // 初始颜色数据（码+名+分类）
-        let colorData = {
-            all: [
-                { code: "#FFFFFF", name: "白色", cate: "blackWhiteGray" },
-                { code: "#FF0000", name: "纯红", cate: "red" },
-                { code: "#00FF00", name: "纯绿", cate: "green" },
-                { code: "#0000FF", name: "纯蓝", cate: "blue" },
-                { code: "#FF00FF", name: "品红", cate: "purple" },
-                { code: "#00FFFF", name: "青色", cate: "cyan" },
-                { code: "#FFFF00", name: "纯黄", cate: "yellow" },
-                { code: "#000000", name: "黑色", cate: "blackWhiteGray" },
-                { code: "#70DB93", name: "草绿色", cate: "green" },
-                { code: "#5C3317", name: "深棕色", cate: "brownOrange" },
-                { code: "#9F5F9F", name: "紫棕色", cate: "purple" },
-                { code: "#B5A642", name: "暗金色", cate: "yellow" },
-                { code: "#D9D919", name: "金黄色", cate: "yellow" },
-                { code: "#A67D3D", name: "浅棕色", cate: "brownOrange" },
-                { code: "#8C7853", name: "卡其色", cate: "brownOrange" },
-                { code: "#5F9F9F", name: "蓝绿色", cate: "cyan" },
-                { code: "#D98719", name: "橙棕色", cate: "brownOrange" },
-                { code: "#B87333", name: "铜色", cate: "brownOrange" },
-                { code: "#FF7F00", name: "橙色", cate: "brownOrange" },
-                { code: "#42426F", name: "暗蓝色", cate: "blue" },
-                { code: "#5C4033", name: "咖啡色", cate: "brownOrange" },
-                { code: "#2F4F2F", name: "深绿色", cate: "green" },
-                { code: "#4A766E", name: "青绿色", cate: "cyan" },
-                { code: "#4F4F2F", name: "橄榄绿", cate: "green" },
-                { code: "#9932CD", name: "暗紫色", cate: "purple" },
-                { code: "#871F78", name: "深紫红色", cate: "red" },
-                { code: "#6B238E", name: "深紫罗兰色", cate: "purple" },
-                { code: "#2F4F4F", name: "深青灰色", cate: "cyan" },
-                { code: "#97694F", name: "陶土色", cate: "brownOrange" },
-                { code: "#7093DB", name: "天蓝色", cate: "blue" },
-                { code: "#855E42", name: "砖棕色", cate: "brownOrange" },
-                { code: "#545454", name: "深灰色", cate: "blackWhiteGray" },
-                { code: "#D19275", name: "桃色", cate: "brownOrange" },
-                { code: "#8E2323", name: "暗红色", cate: "red" },
-                { code: "#238E23", name: "森林绿", cate: "green" },
-                { code: "#CD7F32", name: "黄铜色", cate: "brownOrange" },
-                { code: "#DBDB70", name: "浅黄色", cate: "yellow" },
-                { code: "#C0C0C0", name: "银色", cate: "blackWhiteGray" },
-                { code: "#527F76", name: "蓝绿色", cate: "cyan" },
-                { code: "#93DB70", name: "浅绿色", cate: "green" },
-                { code: "#215E21", name: "墨绿色", cate: "green" },
-                { code: "#4E2F2F", name: "红棕色", cate: "brownOrange" },
-                { code: "#9F9F5F", name: "苔绿色", cate: "yellow" },
-                { code: "#C0D9D9", name: "浅蓝绿色", cate: "cyan" },
-                { code: "#A8A8A8", name: "中灰色", cate: "blackWhiteGray" },
-                { code: "#8F8FBD", name: "淡紫色", cate: "blue" },
-                { code: "#E9C2A6", name: "桃色", cate: "brownOrange" },
-                { code: "#32CD32", name: "lime绿", cate: "green" },
-                { code: "#E47833", name: "橙红色", cate: "red" },
-                { code: "#8E236B", name: "深洋红色", cate: "purple" },
-                { code: "#32CD99", name: "薄荷绿", cate: "cyan" },
-                { code: "#3232CD", name: "深蓝色", cate: "blue" },
-                { code: "#6B8E23", name: "橄榄色", cate: "green" },
-                { code: "#EAEAAE", name: "浅米色", cate: "yellow" },
-                { code: "#9370DB", name: "中紫色", cate: "purple" },
-                { code: "#426F42", name: "暗绿色", cate: "green" },
-                { code: "#7F00FF", name: "深紫色", cate: "purple" },
-                { code: "#7FFF00", name: "春绿色", cate: "green" },
-                { code: "#70DBDB", name: "绿松石色", cate: "cyan" },
-                { code: "#DB7093", name: "浅洋红色", cate: "red" },
-                { code: "#A68064", name: "棕褐色", cate: "brownOrange" },
-                { code: "#2F2F4F", name: "靛蓝色", cate: "blue" },
-                { code: "#23238E", name: "海军蓝", cate: "blue" },
-                { code: "#4D4DFF", name: "浅蓝色", cate: "blue" },
-                { code: "#FF6EC7", name: "浅粉色", cate: "red" },
-                { code: "#00009C", name: "深蓝色", cate: "blue" },
-                { code: "#EBC79E", name: "浅橙色", cate: "brownOrange" },
-                { code: "#CFB53B", name: "金色", cate: "yellow" },
-                { code: "#FF2400", name: "猩红", cate: "red" },
-                { code: "#DB70DB", name: "浅紫色", cate: "purple" },
-                { code: "#8FBC8F", name: "海绿色", cate: "green" },
-                { code: "#BC8F8F", name: "玫瑰棕色", cate: "brownOrange" },
-                { code: "#EAADEA", name: "浅紫红色", cate: "purple" },
-                { code: "#D9D9F3", name: "浅蓝紫色", cate: "blackWhiteGray" },
-                { code: "#5959AB", name: "蓝紫色", cate: "purple" },
-                { code: "#6F4242", name: "红棕色", cate: "brownOrange" },
-                { code: "#BC1717", name: "鲜红色", cate: "red" },
-                { code: "#238E68", name: "蓝绿色", cate: "cyan" },
-                { code: "#6B4226", name: "土棕色", cate: "brownOrange" },
-                { code: "#8E6B23", name: "金棕色", cate: "brownOrange" },
-                { code: "#E6E8FA", name: "淡蓝色", cate: "blackWhiteGray" },
-                { code: "#3299CC", name: "钢蓝色", cate: "cyan" },
-                { code: "#007FFF", name: "天蓝色", cate: "blue" },
-                { code: "#FF1CAE", name: "亮粉色", cate: "red" },
-                { code: "#00FF7F", name: "翡翠绿", cate: "green" },
-                { code: "#236B8E", name: "钢青色", cate: "cyan" },
-                { code: "#38B0DE", name: "亮蓝色", cate: "cyan" },
-                { code: "#DB9370", name: "浅橙色", cate: "brownOrange" },
-                { code: "#D8BFD8", name: "淡紫色", cate: "purple" },
-                { code: "#ADEAEA", name: "浅青色", cate: "cyan" },
-                { code: "#CDCDCD", name: "浅灰色", cate: "blackWhiteGray" },
-                { code: "#4F2F4F", name: "暗紫色", cate: "purple" },
-                { code: "#CC3299", name: "洋红色", cate: "purple" },
-                { code: "#D8D8BF", name: "浅橄榄色", cate: "yellow" },
-                { code: "#99CC32", name: "黄绿色", cate: "yellow" }
-            ],
-            red: [],
-            green: [],
-            blue: [],
-            yellow: [],
-            purple: [],
-            blackWhiteGray: [],
-            brownOrange: [],
-            cyan: []
-        };
+    <!-- 产品服务板块 -->
+    <section id="service" class="py-24 bg-graySoft">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="text-center mb-16">
+                <span class="text-primary text-sm font-medium">OUR SERVICES</span>
+                <h2 class="text-[36px] font-bold text-dark mt-2 mb-4">核心产品服务</h2>
+                <p class="text-gray-500 max-w-2xl mx-auto">从设计、打样、印刷到后期装订安装，全流程标准化服务，满足个人、企业各类图文广告需求</p>
+            </div>
 
-        // 初始化分类数据（按cate字段归类）
-        function initCategoryData() {
-            colorData.red = colorData.all.filter(item => item.cate === "red");
-            colorData.green = colorData.all.filter(item => item.cate === "green");
-            colorData.blue = colorData.all.filter(item => item.cate === "blue");
-            colorData.yellow = colorData.all.filter(item => item.cate === "yellow");
-            colorData.purple = colorData.all.filter(item => item.cate === "purple");
-            colorData.blackWhiteGray = colorData.all.filter(item => item.cate === "blackWhiteGray");
-            colorData.brownOrange = colorData.all.filter(item => item.cate === "brownOrange");
-            colorData.cyan = colorData.all.filter(item => item.cate === "cyan");
-        }
-        initCategoryData();
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- 产品1：商务印刷系列 -->
+                <div class="bg-white rounded-xl p-7 shadow-card hover-scale">
+                    <div class="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center text-primary text-2xl mb-6">
+                        <i class="fa fa-book"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-dark mb-3">商务精装印刷</h3>
+                    <p class="text-gray-500 mb-5">企业画册、宣传册、产品手册、精装标书、年报、说明书批量印刷装订</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">铜版纸印刷</span>
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">锁线精装</span>
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">胶装/骑马钉</span>
+                    </div>
+                </div>
 
-        // DOM元素
-        const colorPicker = document.getElementById('colorPicker');
-        const colorInput = document.getElementById('colorInput');
-        const searchBtn = document.getElementById('searchBtn');
-        const addBtn = document.getElementById('addBtn');
-        const selectedColorCode = document.getElementById('selectedColorCode');
-        const copyBtn = document.getElementById('copyBtn');
-        const errorTip = document.getElementById('errorTip');
-        const colorGrid = document.getElementById('colorGrid');
-        const categoryBtns = document.querySelectorAll('.category-btn');
+                <!-- 产品2：海报展架物料 -->
+                <div class="bg-white rounded-xl p-7 shadow-card hover-scale">
+                    <div class="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center text-primary text-2xl mb-6">
+                        <i class="fa fa-picture-o"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-dark mb-3">宣传展示物料</h3>
+                    <p class="text-gray-500 mb-5">海报、X展架、易拉宝、KT板、写真喷绘、灯箱画面、活动背景板制作</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">高清写真</span>
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">喷绘广告</span>
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">展架定制</span>
+                    </div>
+                </div>
 
-        // 当前选中分类
-        let currentCategory = 'all';
+                <!-- 产品3：办公文印装订 -->
+                <div class="bg-white rounded-xl p-7 shadow-card hover-scale">
+                    <div class="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center text-primary text-2xl mb-6">
+                        <i class="fa fa-files-o"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-dark mb-3">办公文印装订</h3>
+                    <p class="text-gray-500 mb-5">黑白/彩色快印、标书胶装、热熔装订、打孔装订、简历资料、图纸打印扫描</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">极速快印</span>
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">图纸扫描</span>
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">多种装订</span>
+                    </div>
+                </div>
 
-        // 颜色码格式化
-        function formatColorCode(code) {
-            let cleanCode = code.trim().replace('#', '').toLowerCase();
-            if (cleanCode.length === 3) {
-                cleanCode = cleanCode[0] + cleanCode[0] + cleanCode[1] + cleanCode[1] + cleanCode[2] + cleanCode[2];
-            }
-            return `#${cleanCode}`;
-        }
+                <!-- 产品4：品牌VI物料 -->
+                <div class="bg-white rounded-xl p-7 shadow-card hover-scale">
+                    <div class="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center text-primary text-2xl mb-6">
+                        <i class="fa fa-id-card"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-dark mb-3">品牌文创物料</h3>
+                    <p class="text-gray-500 mb-5">名片、会员卡、优惠券、手提袋、信封、不干胶贴纸、台历挂历、工作证</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">特种纸名片</span>
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">包装纸袋</span>
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">不干胶标签</span>
+                    </div>
+                </div>
 
-        // 验证颜色码有效性
-        function isValidColor(code) {
-            const reg = /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
-            return reg.test(code.trim());
-        }
+                <!-- 产品5：广告标识制作 -->
+                <div class="bg-white rounded-xl p-7 shadow-card hover-scale">
+                    <div class="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center text-primary text-2xl mb-6">
+                        <i class="fa fa-map-marker"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-dark mb-3">门头标识广告</h3>
+                    <p class="text-gray-500 mb-5">发光字、亚克力标牌、企业文化墙、门牌、安全标识、车身贴、玻璃贴</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">发光字</span>
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">文化墙</span>
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">玻璃贴膜</span>
+                    </div>
+                </div>
 
-        // 更新选中颜色显示
-        function updateSelectedColor(color) {
-            const formattedColor = formatColorCode(color);
-            colorPicker.value = formattedColor;
-            selectedColorCode.textContent = formattedColor;
-            selectedColorCode.style.backgroundColor = formattedColor;
-            
-            // 自动调整文字颜色
-            const r = parseInt(formattedColor.slice(1, 3), 16);
-            const g = parseInt(formattedColor.slice(3, 5), 16);
-            const b = parseInt(formattedColor.slice(5, 7), 16);
-            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-            selectedColorCode.style.color = brightness > 125 ? '#000' : '#fff';
-            
-            // 清除高亮
-            document.querySelectorAll('.color-item.highlight').forEach(item => {
-                item.classList.remove('highlight');
-            });
-            return formattedColor;
-        }
+                <!-- 产品6：平面设计服务 -->
+                <div class="bg-white rounded-xl p-7 shadow-card hover-scale">
+                    <div class="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center text-primary text-2xl mb-6">
+                        <i class="fa fa-paint-brush"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-dark mb-3">专业视觉设计</h3>
+                    <p class="text-gray-500 mb-5">LOGO设计、VI整套、海报宣传单、画册排版、包装设计、PPT美化、图片精修</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">品牌设计</span>
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">排版美工</span>
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">PPT定制</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        // 生成颜色网格
-        function renderColorGrid(category = 'all') {
-            colorGrid.innerHTML = '';
-            const colors = colorData[category];
-            
-            colors.forEach(color => {
-                const formattedColor = formatColorCode(color.code);
-                // 创建颜色项
-                const colorItem = document.createElement('div');
-                colorItem.className = 'color-item';
-                colorItem.dataset.color = formattedColor;
-                colorItem.dataset.cate = color.cate;
+    <!-- 产品样例展示 -->
+    <section id="case" class="py-24">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="text-center mb-16">
+                <span class="text-primary text-sm font-medium">PRODUCT CASES</span>
+                <h2 class="text-[36px] font-bold text-dark mt-2 mb-4">精选产品样例</h2>
+                <p class="text-gray-500 max-w-2xl mx-auto">实拍成品案例，多材质工艺可选，支持来图定制、免费设计打样</p>
+            </div>
 
-                // 删除按钮
-                const delBtn = document.createElement('div');
-                delBtn.className = 'del-btn';
-                delBtn.textContent = '×';
-                delBtn.onclick = (e) => {
-                    e.stopPropagation(); // 阻止触发色块点击事件
-                    deleteColor(formattedColor);
-                };
+            <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div class="rounded-xl overflow-hidden shadow-card hover-scale">
+                    <img src="https://img2.baidu.com/it/u=2644359942,1246239445&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=600" class="w-full h-[260px] object-cover" alt="企业精装画册">
+                    <div class="p-4">
+                        <h4 class="font-bold text-dark">企业精装宣传画册</h4>
+                        <p class="text-gray-400 text-sm mt-1">特种纸烫金工艺</p>
+                    </div>
+                </div>
+                <div class="rounded-xl overflow-hidden shadow-card hover-scale">
+                    <img src="https://img0.baidu.com/it/u=3285423119,259152444&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=600" class="w-full h-[260px] object-cover" alt="高端商务名片">
+                    <div class="p-4">
+                        <h4 class="font-bold text-dark">特种纸商务名片</h4>
+                        <p class="text-gray-400 text-sm mt-1">烫银/凹凸工艺</p>
+                    </div>
+                </div>
+                <div class="rounded-xl overflow-hidden shadow-card hover-scale">
+                    <img src="https://img1.baidu.com/it/u=392214522,3104221220&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=600" class="w-full h-[260px] object-cover" alt="活动易拉宝展架">
+                    <div class="p-4">
+                        <h4 class="font-bold text-dark">高清易拉宝展架</h4>
+                        <p class="text-gray-400 text-sm mt-1">防水防晒材质</p>
+                    </div>
+                </div>
+                <div class="rounded-xl overflow-hidden shadow-card hover-scale">
+                    <img src="https://img2.baidu.com/it/u=1746233412,3325214441&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=600" class="w-full h-[260px] object-cover" alt="企业手提纸袋">
+                    <div class="p-4">
+                        <h4 class="font-bold text-dark">牛皮纸手提袋</h4>
+                        <p class="text-gray-400 text-sm mt-1">多尺寸可定制</p>
+                    </div>
+                </div>
+                <div class="rounded-xl overflow-hidden shadow-card hover-scale">
+                    <img src="https://img0.baidu.com/it/u=1992366400,2972211143&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=600" class="w-full h-[260px] object-cover" alt="热熔精装标书">
+                    <div class="p-4">
+                        <h4 class="font-bold text-dark">热熔精装投标文件</h4>
+                        <p class="text-gray-400 text-sm mt-1">标书专业封装</p>
+                    </div>
+                </div>
+                <div class="rounded-xl overflow-hidden shadow-card hover-scale">
+                    <img src="https://img2.baidu.com/it/u=2289942234,1909932413&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=600" class="w-full h-[260px] object-cover" alt="企业文化形象墙">
+                    <div class="p-4">
+                        <h4 class="font-bold text-dark">企业文化形象墙</h4>
+                        <p class="text-gray-400 text-sm mt-1">亚克力精工雕刻</p>
+                    </div>
+                </div>
+                <div class="rounded-xl overflow-hidden shadow-card hover-scale">
+                    <img src="https://img2.baidu.com/it/u=3441235661,2012235666&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=600" class="w-full h-[260px] object-cover" alt="宣传单三折页">
+                    <div class="p-4">
+                        <h4 class="font-bold text-dark">三折页宣传单</h4>
+                        <p class="text-gray-400 text-sm mt-1">157g铜版纸双面彩印</p>
+                    </div>
+                </div>
+                <div class="rounded-xl overflow-hidden shadow-card hover-scale">
+                    <img src="https://img1.baidu.com/it/u=1392546661,3722214555&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=600" class="w-full h-[260px] object-cover" alt="不干胶标签贴纸">
+                    <div class="p-4">
+                        <h4 class="font-bold text-dark">彩色不干胶标签</h4>
+                        <p class="text-gray-400 text-sm mt-1">防水可移材质</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                // 颜色块
-                const colorBlock = document.createElement('div');
-                colorBlock.className = 'color-block';
-                colorBlock.style.backgroundColor = formattedColor;
+    <!-- 关于我们 -->
+    <section id="about" class="py-24 bg-graySoft">
+        <div class="container mx-auto px-4 md:px-8 grid md:grid-cols-2 gap-12 items-center">
+            <div class="rounded-2xl overflow-hidden shadow-card">
+                <img src="https://img2.baidu.com/it/u=2794113643,335005612&fm=253&fmt=auto&app=138&f=JPEG?w=800&h=550" alt="TALLSI图文门店车间" class="w-full">
+            </div>
+            <div>
+                <span class="text-primary text-sm font-medium">ABOUT TALLSI</span>
+                <h2 class="text-[36px] font-bold text-dark mt-2 mb-6">关于 TALLSI 图文</h2>
+                <p class="text-gray-500 leading-relaxed mb-5">
+                    TALLSI图文专注于企业商业图文广告全链路服务，集创意设计、高清印刷、广告制作、安装落地于一体。配备全新数码印刷机、大型喷绘写真设备、精装装订生产线，严格把控每一道工艺。
+                </p>
+                <p class="text-gray-500 leading-relaxed mb-8">
+                    我们坚持高性价比+精工品质，支持急单加急交付，提供一对一设计师对接服务，已为数千家政企、中小企业、门店商家提供稳定可靠的图文物料解决方案。
+                </p>
+                <div class="grid grid-cols-2 gap-5">
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <i class="fa fa-check-circle text-primary text-lg"></i>
+                        <span class="ml-2 font-medium">原厂环保纸张油墨</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <i class="fa fa-check-circle text-primary text-lg"></i>
+                        <span class="ml-2 font-medium">专业设计师一对一</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <i class="fa fa-check-circle text-primary text-lg"></i>
+                        <span class="ml-2 font-medium">急单当日可交付</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
+                        <i class="fa fa-check-circle text-primary text-lg"></i>
+                        <span class="ml-2 font-medium">免费上门送货安装</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                // 颜色名称
-                const colorNameText = document.createElement('div');
-                colorNameText.className = 'color-name';
-                colorNameText.textContent = color.name;
+    <!-- 联系我们 -->
+    <section id="contact" class="py-24 bg-dark text-white">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="text-center mb-16">
+                <span class="text-primary text-sm font-medium">CONTACT US</span>
+                <h2 class="text-[36px] font-bold mt-2 mb-4">立即获取报价与设计方案</h2>
+                <p class="text-gray-300 max-w-2xl mx-auto">发送需求、尺寸、数量即可免费出初稿报价，支持线上远程接单</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 text-center">
+                <div class="border border-gray-700 p-8 rounded-xl hover:border-primary transition-colors">
+                    <i class="fa fa-phone text-primary text-[32px] mb-4"></i>
+                    <h4 class="text-xl font-bold mb-2">咨询电话</h4>
+                    <p class="text-gray-300">138-0000-8888</p>
+                </div>
+                <div class="border border-gray-700 p-8 rounded-xl hover:border-primary transition-colors">
+                    <i class="fa fa-map-marker text-primary text-[32px] mb-4"></i>
+                    <h4 class="text-xl font-bold mb-2">门店地址</h4>
+                    <p class="text-gray-300">XX市XX区商业路126号TALLSI图文广告</p>
+                </div>
+                <div class="border border-gray-700 p-8 rounded-xl hover:border-primary transition-colors">
+                    <i class="fa fa-clock-o text-primary text-[32px] mb-4"></i>
+                    <h4 class="text-xl font-bold mb-2">营业时间</h4>
+                    <p class="text-gray-300">周一至周日 8:30 - 21:00</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                // 颜色码
-                const colorCodeText = document.createElement('div');
-                colorCodeText.className = 'color-code';
-                colorCodeText.textContent = formattedColor;
+    <!-- 页脚 -->
+    <footer class="bg-[111827] py-8 text-center text-gray-400 text-sm">
+        <div class="container mx-auto px-4">
+            <h3 class="text-white text-xl font-bold tracking-wider mb-3">TALLSI 图文广告</h3>
+            <p>© 2026 TALLSI All Rights Reserved. 一站式图文印刷广告服务商</p>
+        </div>
+    </footer>
 
-                // 组装
-                colorItem.appendChild(delBtn);
-                colorItem.appendChild(colorBlock);
-                colorItem.appendChild(colorNameText);
-                colorItem.appendChild(colorCodeText);
-                colorGrid.appendChild(colorItem);
-
-                // 点击色块选中颜色
-                colorItem.onclick = () => {
-                    updateSelectedColor(formattedColor);
-                    colorItem.classList.add('highlight');
-                };
-            });
-        }
-
-        // 删除颜色
-        function deleteColor(targetColor) {
-            // 从all数组中删除
-            colorData.all = colorData.all.filter(item => formatColorCode(item.code) !== targetColor);
-            // 重新初始化分类数据
-            initCategoryData();
-            // 重新渲染
-            renderColorGrid(currentCategory);
-        }
-
-        // 添加颜色（新增自定义名称功能）
-        function addColor() {
-            const inputVal = colorInput.value.trim();
-            // 1. 验证颜色码格式
-            if (!isValidColor(inputVal)) {
-                errorTip.style.display = 'block';
-                return;
-            }
-            errorTip.style.display = 'none';
-            
-            const newColorCode = formatColorCode(inputVal);
-            // 2. 检查颜色是否已存在
-            const isExist = colorData.all.some(item => formatColorCode(item.code) === newColorCode);
-            if (isExist) {
-                alert(`颜色 ${newColorCode} 已存在！`);
-                return;
-            }
-
-            // 3. 弹出输入框让用户自定义颜色名称
-            let colorName = prompt(`请输入颜色 ${newColorCode} 的名称：`, "自定义颜色");
-            // 取消输入则终止添加
-            if (colorName === null) return;
-            // 名称为空则默认用"自定义颜色"
-            colorName = colorName.trim() || "自定义颜色";
-
-            // 4. 添加到颜色库
-            colorData.all.push({
-                code: newColorCode,
-                name: colorName, // 使用用户输入的名称
-                cate: "all"
-            });
-            // 重新初始化分类
-            initCategoryData();
-            // 清空输入框
-            colorInput.value = '';
-            // 重新渲染
-            renderColorGrid(currentCategory);
-            // 选中新增的颜色
-            updateSelectedColor(newColorCode);
-            alert(`颜色 ${newColorCode}（${colorName}）添加成功！`);
-        }
-
-        // 查找颜色
-        function searchColor() {
-            const inputVal = colorInput.value.trim();
-            if (!isValidColor(inputVal)) {
-                errorTip.style.display = 'block';
-                return;
-            }
-            errorTip.style.display = 'none';
-            
-            const targetColor = formatColorCode(inputVal);
-            updateSelectedColor(targetColor);
-            
-            const targetItem = document.querySelector(`.color-item[data-color="${targetColor}"]`);
-            if (targetItem) {
-                targetItem.classList.add('highlight');
-                targetItem.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center'
-                });
-                colorInput.value = '';
-            } else {
-                alert(`未找到颜色码：${targetColor}`);
-            }
-        }
-
-        // 复制颜色码
-        function copyColorCode() {
-            const color = selectedColorCode.textContent;
-            navigator.clipboard.writeText(color)
-                .then(() => {
-                    copyBtn.textContent = '已复制';
-                    setTimeout(() => {
-                        copyBtn.textContent = '复制';
-                    }, 800);
-                })
-                .catch(err => {
-                    alert('复制失败：' + err);
-                });
-        }
-
-        // 绑定分类筛选事件
-        categoryBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                categoryBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentCategory = btn.dataset.category;
-                renderColorGrid(currentCategory);
-            });
-        });
-
-        // 绑定按钮事件
-        colorPicker.addEventListener('input', () => {
-            updateSelectedColor(colorPicker.value);
-        });
-        searchBtn.addEventListener('click', searchColor);
-        addBtn.addEventListener('click', addColor);
-        copyBtn.addEventListener('click', copyColorCode);
-        // 输入框回车触发查找
-        colorInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') searchColor();
-        });
-
-        // 初始化
-        window.addEventListener('load', () => {
-            renderColorGrid('all');
-            updateSelectedColor(colorPicker.value);
-        });
-    </script>
+    <!-- 回到顶部 -->
+    <a href="#home" class="fixed bottom-8 right-8 w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-all">
+        <i class="fa fa-arrow-up"></i>
+    </a>
 </body>
 </html>
