@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自定义颜色面板（可删可加/6列/色系分类）</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 10px;
+        }
+        h1 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+        /* 顶部操作区（固定） */
+        .top-area {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        /* 色系分类栏 */
+        .category-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .category-btn {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        .category-btn.active {
+            background-color: #409eff;
+            color: white;
+            border-color: #409eff;
+        }
+        .category-btn:hover {
+            background-color: #e9ecef;
+        }
+        .category-btn.active:hover {
+            background-color: #66b1ff;
+        }
+        /* 取色器+输入+添加区 */
+        .picker-search-add-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        #colorPicker {
+            width: 50px;
+            height: 50px;
+            border: none;
+            cursor: pointer;
+            background-color: transparent;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #colorInput {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: "Consolas", monospace;
+            width: 150px;
+        }
+        #colorInput:focus {
+            outline: none;
+            border-color: #409eff;
+        }
+        #searchBtn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            background-color: #409eff;
+            color: white;
+            cursor: pointer;
+        }
+        #addBtn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            background-color: #67c23a;
+            color: white;
+            cursor: pointer;
+        }
+        .picker-result {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #selectedColorCode {
+            font-size: 14px;
+            font-family: "Consolas", monospace;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-width: 120px;
+            text-align: center;
+        }
+        #copyBtn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            background-color: #13ce66;
+            color: white;
+            cursor: pointer;
+        }
+        .tips {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .error-tip {
+            font-size: 12px;
+            color: #f56c6c;
+            text-align: center;
+            margin-top: 8px;
+            display: none;
+        }
+        /* 颜色块滚动容器 */
+        .color-scroll-container {
+            height: 500px;
+            overflow-y: auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        /* 6列网格布局 */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+        }
+        /* 颜色卡片（带删除按钮） */
+        .color-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .color-item:hover {
+            background-color: #e9ecef;
+            transform: translateY(-2px);
+        }
+        .color-item.highlight {
+            border: 2px solid #409eff;
+            background-color: #f0f8ff;
+        }
+        /* 删除按钮（悬浮显示） */
+        .del-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 18px;
+            height: 18px;
+            line-height: 16px;
+            text-align: center;
+            background-color: #f56c6c;
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            cursor: pointer;
+            display: none;
+            z-index: 10;
+        }
+        .color-item:hover .del-btn {
+            display: block;
+        }
+        .color-block {
+            width: 64px;
+            height: 15px;
+            border: 1px solid #ccc;
+        }
+        .color-name {
+            font-size: 11px;
+            color: #666;
+            text-align: center;
+            max-width: 80px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .color-code {
+            font-size: 11px;
+            color: #333;
+            font-family: "Consolas", monospace;
+            text-align: center;
+        }
+        /* 滚动条美化 */
+        .color-scroll-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .color-scroll-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        .color-scroll-container::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>自定义颜色面板（可删可加/6列/色系分类）</h1>
+        
+        <!-- 顶部固定操作区 -->
+        <div class="top-area">
+            <!-- 色系分类筛选 -->
+            <div class="category-filter">
+                <button class="category-btn active" data-category="all">全部</button>
+                <button class="category-btn" data-category="red">红色系</button>
+                <button class="category-btn" data-category="green">绿色系</button>
+                <button class="category-btn" data-category="blue">蓝色系</button>
+                <button class="category-btn" data-category="yellow">黄色系</button>
+                <button class="category-btn" data-category="purple">紫色系</button>
+                <button class="category-btn" data-category="blackWhiteGray">黑/白/灰系</button>
+                <button class="category-btn" data-category="brownOrange">棕/橙色系</button>
+                <button class="category-btn" data-category="cyan">青/蓝绿系</button>
+            </div>
+            
+            <div class="picker-search-add-area">
+                <!-- 颜色吸管 -->
+                <input type="color" id="colorPicker" value="#FFFFFF">
+                
+                <!-- 颜色码输入+搜索+添加 -->
+                <div class="input-group">
+                    <input type="text" id="colorInput" placeholder="输入颜色码 #fff/ffffff">
+                    <button id="searchBtn">查找</button>
+                    <button id="addBtn">添加颜色</button>
+                </div>
+                
+                <!-- 选中结果+复制 -->
+                <div class="picker-result">
+                    <div id="selectedColorCode">#FFFFFF</div>
+                    <button id="copyBtn">复制</button>
+                </div>
+            </div>
+            
+            <div class="error-tip" id="errorTip">请输入有效的3位/6位颜色码（支持带#/不带#）</div>
+            <div class="tips">提示：悬浮颜色块显示删除按钮，输入颜色码可添加/查找</div>
+        </div>
+        
+        <!-- 颜色块滚动容器 -->
+        <div class="color-scroll-container">
+            <div class="color-grid" id="colorGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        // 初始颜色数据（码+名+分类）
+        let colorData = {
+            all: [
+                { code: "#FFFFFF", name: "白色", cate: "blackWhiteGray" },
+                { code: "#FF0000", name: "纯红", cate: "red" },
+                { code: "#00FF00", name: "纯绿", cate: "green" },
+                { code: "#0000FF", name: "纯蓝", cate: "blue" },
+                { code: "#FF00FF", name: "品红", cate: "purple" },
+                { code: "#00FFFF", name: "青色", cate: "cyan" },
+                { code: "#FFFF00", name: "纯黄", cate: "yellow" },
+                { code: "#000000", name: "黑色", cate: "blackWhiteGray" },
+                { code: "#70DB93", name: "草绿色", cate: "green" },
+                { code: "#5C3317", name: "深棕色", cate: "brownOrange" },
+                { code: "#9F5F9F", name: "紫棕色", cate: "purple" },
+                { code: "#B5A642", name: "暗金色", cate: "yellow" },
+                { code: "#D9D919", name: "金黄色", cate: "yellow" },
+                { code: "#A67D3D", name: "浅棕色", cate: "brownOrange" },
+                { code: "#8C7853", name: "卡其色", cate: "brownOrange" },
+                { code: "#5F9F9F", name: "蓝绿色", cate: "cyan" },
+                { code: "#D98719", name: "橙棕色", cate: "brownOrange" },
+                { code: "#B87333", name: "铜色", cate: "brownOrange" },
+                { code: "#FF7F00", name: "橙色", cate: "brownOrange" },
+                { code: "#42426F", name: "暗蓝色", cate: "blue" },
+                { code: "#5C4033", name: "咖啡色", cate: "brownOrange" },
+                { code: "#2F4F2F", name: "深绿色", cate: "green" },
+                { code: "#4A766E", name: "青绿色", cate: "cyan" },
+                { code: "#4F4F2F", name: "橄榄绿", cate: "green" },
+                { code: "#9932CD", name: "暗紫色", cate: "purple" },
+                { code: "#871F78", name: "深紫红色", cate: "red" },
+                { code: "#6B238E", name: "深紫罗兰色", cate: "purple" },
+                { code: "#2F4F4F", name: "深青灰色", cate: "cyan" },
+                { code: "#97694F", name: "陶土色", cate: "brownOrange" },
+                { code: "#7093DB", name: "天蓝色", cate: "blue" },
+                { code: "#855E42", name: "砖棕色", cate: "brownOrange" },
+                { code: "#545454", name: "深灰色", cate: "blackWhiteGray" },
+                { code: "#D19275", name: "桃色", cate: "brownOrange" },
+                { code: "#8E2323", name: "暗红色", cate: "red" },
+                { code: "#238E23", name: "森林绿", cate: "green" },
+                { code: "#CD7F32", name: "黄铜色", cate: "brownOrange" },
+                { code: "#DBDB70", name: "浅黄色", cate: "yellow" },
+                { code: "#C0C0C0", name: "银色", cate: "blackWhiteGray" },
+                { code: "#527F76", name: "蓝绿色", cate: "cyan" },
+                { code: "#93DB70", name: "浅绿色", cate: "green" },
+                { code: "#215E21", name: "墨绿色", cate: "green" },
+                { code: "#4E2F2F", name: "红棕色", cate: "brownOrange" },
+                { code: "#9F9F5F", name: "苔绿色", cate: "yellow" },
+                { code: "#C0D9D9", name: "浅蓝绿色", cate: "cyan" },
+                { code: "#A8A8A8", name: "中灰色", cate: "blackWhiteGray" },
+                { code: "#8F8FBD", name: "淡紫色", cate: "blue" },
+                { code: "#E9C2A6", name: "桃色", cate: "brownOrange" },
+                { code: "#32CD32", name: "lime绿", cate: "green" },
+                { code: "#E47833", name: "橙红色", cate: "red" },
+                { code: "#8E236B", name: "深洋红色", cate: "purple" },
+                { code: "#32CD99", name: "薄荷绿", cate: "cyan" },
+                { code: "#3232CD", name: "深蓝色", cate: "blue" },
+                { code: "#6B8E23", name: "橄榄色", cate: "green" },
+                { code: "#EAEAAE", name: "浅米色", cate: "yellow" },
+                { code: "#9370DB", name: "中紫色", cate: "purple" },
+                { code: "#426F42", name: "暗绿色", cate: "green" },
+                { code: "#7F00FF", name: "深紫色", cate: "purple" },
+                { code: "#7FFF00", name: "春绿色", cate: "green" },
+                { code: "#70DBDB", name: "绿松石色", cate: "cyan" },
+                { code: "#DB7093", name: "浅洋红色", cate: "red" },
+                { code: "#A68064", name: "棕褐色", cate: "brownOrange" },
+                { code: "#2F2F4F", name: "靛蓝色", cate: "blue" },
+                { code: "#23238E", name: "海军蓝", cate: "blue" },
+                { code: "#4D4DFF", name: "浅蓝色", cate: "blue" },
+                { code: "#FF6EC7", name: "浅粉色", cate: "red" },
+                { code: "#00009C", name: "深蓝色", cate: "blue" },
+                { code: "#EBC79E", name: "浅橙色", cate: "brownOrange" },
+                { code: "#CFB53B", name: "金色", cate: "yellow" },
+                { code: "#FF2400", name: "猩红", cate: "red" },
+                { code: "#DB70DB", name: "浅紫色", cate: "purple" },
+                { code: "#8FBC8F", name: "海绿色", cate: "green" },
+                { code: "#BC8F8F", name: "玫瑰棕色", cate: "brownOrange" },
+                { code: "#EAADEA", name: "浅紫红色", cate: "purple" },
+                { code: "#D9D9F3", name: "浅蓝紫色", cate: "blackWhiteGray" },
+                { code: "#5959AB", name: "蓝紫色", cate: "purple" },
+                { code: "#6F4242", name: "红棕色", cate: "brownOrange" },
+                { code: "#BC1717", name: "鲜红色", cate: "red" },
+                { code: "#238E68", name: "蓝绿色", cate: "cyan" },
+                { code: "#6B4226", name: "土棕色", cate: "brownOrange" },
+                { code: "#8E6B23", name: "金棕色", cate: "brownOrange" },
+                { code: "#E6E8FA", name: "淡蓝色", cate: "blackWhiteGray" },
+                { code: "#3299CC", name: "钢蓝色", cate: "cyan" },
+                { code: "#007FFF", name: "天蓝色", cate: "blue" },
+                { code: "#FF1CAE", name: "亮粉色", cate: "red" },
+                { code: "#00FF7F", name: "翡翠绿", cate: "green" },
+                { code: "#236B8E", name: "钢青色", cate: "cyan" },
+                { code: "#38B0DE", name: "亮蓝色", cate: "cyan" },
+                { code: "#DB9370", name: "浅橙色", cate: "brownOrange" },
+                { code: "#D8BFD8", name: "淡紫色", cate: "purple" },
+                { code: "#ADEAEA", name: "浅青色", cate: "cyan" },
+                { code: "#CDCDCD", name: "浅灰色", cate: "blackWhiteGray" },
+                { code: "#4F2F4F", name: "暗紫色", cate: "purple" },
+                { code: "#CC3299", name: "洋红色", cate: "purple" },
+                { code: "#D8D8BF", name: "浅橄榄色", cate: "yellow" },
+                { code: "#99CC32", name: "黄绿色", cate: "yellow" }
+            ],
+            red: [],
+            green: [],
+            blue: [],
+            yellow: [],
+            purple: [],
+            blackWhiteGray: [],
+            brownOrange: [],
+            cyan: []
+        };
+
+        // 初始化分类数据（按cate字段归类）
+        function initCategoryData() {
+            colorData.red = colorData.all.filter(item => item.cate === "red");
+            colorData.green = colorData.all.filter(item => item.cate === "green");
+            colorData.blue = colorData.all.filter(item => item.cate === "blue");
+            colorData.yellow = colorData.all.filter(item => item.cate === "yellow");
+            colorData.purple = colorData.all.filter(item => item.cate === "purple");
+            colorData.blackWhiteGray = colorData.all.filter(item => item.cate === "blackWhiteGray");
+            colorData.brownOrange = colorData.all.filter(item => item.cate === "brownOrange");
+            colorData.cyan = colorData.all.filter(item => item.cate === "cyan");
+        }
+        initCategoryData();
+
+        // DOM元素
+        const colorPicker = document.getElementById('colorPicker');
+        const colorInput = document.getElementById('colorInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const addBtn = document.getElementById('addBtn');
+        const selectedColorCode = document.getElementById('selectedColorCode');
+        const copyBtn = document.getElementById('copyBtn');
+        const errorTip = document.getElementById('errorTip');
+        const colorGrid = document.getElementById('colorGrid');
+        const categoryBtns = document.querySelectorAll('.category-btn');
+
+        // 当前选中分类
+        let currentCategory = 'all';
+
+        // 颜色码格式化
+        function formatColorCode(code) {
+            let cleanCode = code.trim().replace('#', '').toLowerCase();
+            if (cleanCode.length === 3) {
+                cleanCode = cleanCode[0] + cleanCode[0] + cleanCode[1] + cleanCode[1] + cleanCode[2] + cleanCode[2];
+            }
+            return `#${cleanCode}`;
+        }
+
+        // 验证颜色码有效性
+        function isValidColor(code) {
+            const reg = /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+            return reg.test(code.trim());
+        }
+
+        // 更新选中颜色显示
+        function updateSelectedColor(color) {
+            const formattedColor = formatColorCode(color);
+            colorPicker.value = formattedColor;
+            selectedColorCode.textContent = formattedColor;
+            selectedColorCode.style.backgroundColor = formattedColor;
+            
+            // 自动调整文字颜色
+            const r = parseInt(formattedColor.slice(1, 3), 16);
+            const g = parseInt(formattedColor.slice(3, 5), 16);
+            const b = parseInt(formattedColor.slice(5, 7), 16);
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            selectedColorCode.style.color = brightness > 125 ? '#000' : '#fff';
+            
+            // 清除高亮
+            document.querySelectorAll('.color-item.highlight').forEach(item => {
+                item.classList.remove('highlight');
+            });
+            return formattedColor;
+        }
+
+        // 生成颜色网格
+        function renderColorGrid(category = 'all') {
+            colorGrid.innerHTML = '';
+            const colors = colorData[category];
+            
+            colors.forEach(color => {
+                const formattedColor = formatColorCode(color.code);
+                // 创建颜色项
+                const colorItem = document.createElement('div');
+                colorItem.className = 'color-item';
+                colorItem.dataset.color = formattedColor;
+                colorItem.dataset.cate = color.cate;
+
+                // 删除按钮
+                const delBtn = document.createElement('div');
+                delBtn.className = 'del-btn';
+                delBtn.textContent = '×';
+                delBtn.onclick = (e) => {
+                    e.stopPropagation(); // 阻止触发色块点击事件
+                    deleteColor(formattedColor);
+                };
+
+                // 颜色块
+                const colorBlock = document.createElement('div');
+                colorBlock.className = 'color-block';
+                colorBlock.style.backgroundColor = formattedColor;
+
+                // 颜色名称
+                const colorNameText = document.createElement('div');
+                colorNameText.className = 'color-name';
+                colorNameText.textContent = color.name;
+
+                // 颜色码
+                const colorCodeText = document.createElement('div');
+                colorCodeText.className = 'color-code';
+                colorCodeText.textContent = formattedColor;
+
+                // 组装
+                colorItem.appendChild(delBtn);
+                colorItem.appendChild(colorBlock);
+                colorItem.appendChild(colorNameText);
+                colorItem.appendChild(colorCodeText);
+                colorGrid.appendChild(colorItem);
+
+                // 点击色块选中颜色
+                colorItem.onclick = () => {
+                    updateSelectedColor(formattedColor);
+                    colorItem.classList.add('highlight');
+                };
+            });
+        }
+
+        // 删除颜色
+        function deleteColor(targetColor) {
+            // 从all数组中删除
+            colorData.all = colorData.all.filter(item => formatColorCode(item.code) !== targetColor);
+            // 重新初始化分类数据
+            initCategoryData();
+            // 重新渲染
+            renderColorGrid(currentCategory);
+        }
+
+        // 添加颜色（新增自定义名称功能）
+        function addColor() {
+            const inputVal = colorInput.value.trim();
+            // 1. 验证颜色码格式
+            if (!isValidColor(inputVal)) {
+                errorTip.style.display = 'block';
+                return;
+            }
+            errorTip.style.display = 'none';
+            
+            const newColorCode = formatColorCode(inputVal);
+            // 2. 检查颜色是否已存在
+            const isExist = colorData.all.some(item => formatColorCode(item.code) === newColorCode);
+            if (isExist) {
+                alert(`颜色 ${newColorCode} 已存在！`);
+                return;
+            }
+
+            // 3. 弹出输入框让用户自定义颜色名称
+            let colorName = prompt(`请输入颜色 ${newColorCode} 的名称：`, "自定义颜色");
+            // 取消输入则终止添加
+            if (colorName === null) return;
+            // 名称为空则默认用"自定义颜色"
+            colorName = colorName.trim() || "自定义颜色";
+
+            // 4. 添加到颜色库
+            colorData.all.push({
+                code: newColorCode,
+                name: colorName, // 使用用户输入的名称
+                cate: "all"
+            });
+            // 重新初始化分类
+            initCategoryData();
+            // 清空输入框
+            colorInput.value = '';
+            // 重新渲染
+            renderColorGrid(currentCategory);
+            // 选中新增的颜色
+            updateSelectedColor(newColorCode);
+            alert(`颜色 ${newColorCode}（${colorName}）添加成功！`);
+        }
+
+        // 查找颜色
+        function searchColor() {
+            const inputVal = colorInput.value.trim();
+            if (!isValidColor(inputVal)) {
+                errorTip.style.display = 'block';
+                return;
+            }
+            errorTip.style.display = 'none';
+            
+            const targetColor = formatColorCode(inputVal);
+            updateSelectedColor(targetColor);
+            
+            const targetItem = document.querySelector(`.color-item[data-color="${targetColor}"]`);
+            if (targetItem) {
+                targetItem.classList.add('highlight');
+                targetItem.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+                colorInput.value = '';
+            } else {
+                alert(`未找到颜色码：${targetColor}`);
+            }
+        }
+
+        // 复制颜色码
+        function copyColorCode() {
+            const color = selectedColorCode.textContent;
+            navigator.clipboard.writeText(color)
+                .then(() => {
+                    copyBtn.textContent = '已复制';
+                    setTimeout(() => {
+                        copyBtn.textContent = '复制';
+                    }, 800);
+                })
+                .catch(err => {
+                    alert('复制失败：' + err);
+                });
+        }
+
+        // 绑定分类筛选事件
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                categoryBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentCategory = btn.dataset.category;
+                renderColorGrid(currentCategory);
+            });
+        });
+
+        // 绑定按钮事件
+        colorPicker.addEventListener('input', () => {
+            updateSelectedColor(colorPicker.value);
+        });
+        searchBtn.addEventListener('click', searchColor);
+        addBtn.addEventListener('click', addColor);
+        copyBtn.addEventListener('click', copyColorCode);
+        // 输入框回车触发查找
+        colorInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') searchColor();
+        });
+
+        // 初始化
+        window.addEventListener('load', () => {
+            renderColorGrid('all');
+            updateSelectedColor(colorPicker.value);
+        });
+    </script>
+</body>
+</html>
