@@ -8,9 +8,9 @@
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     
-    <cript rc="https://cdn.tailwindcss.com"></cript>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <cript>
+    <script>
         tailwind.config = {
             theme: {
                 extend: {
@@ -20,95 +20,109 @@
                         graySoft: '#F2F4F7'
                     },
                     fontFamily: {
-                        an: ['Inter', 'ytem-ui', 'an-erif']
+                        an: ['Inter', 'system-ui', 'sans-serif']
                     }
                 }
             }
         }
-    </cript>
-    <tyle type="text/tailwindc">
-        @layer utilitie {
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
             .content-auto {
-                content-viibility: auto;
+                content-visibility: auto;
             }
-            .hadow-card {
-                box-hadow: 0 8px 30px rgba(22, 93, 255, 0.08);
+            .shadow-card {
+                box-shadow: 0 8px 30px rgba(22, 93, 255, 0.08);
             }
             .text-gradient {
                 background: linear-gradient(90deg, #165DFF, #4080FF);
                 -webkit-background-clip: text;
-                -webkit-text-fill-color: tranparent;
+                -webkit-text-fill-color: transparent;
             }
-            .hover-cale {
-                tranition: all 0.3 eae;
+            .hover-scale {
+                transition: all 0.3s ease;
             }
-            .hover-cale:hover {
-                tranform: tranlateY(-6px) cale(1.02);
+            .hover-scale:hover {
+                transform: translateY(-6px) scale(1.02);
             }
         }
-    </tyle>
+        /* 全局平滑滚动 */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
 </head>
-<body cla="bg-white font-an text-gray-700 overflow-x-hidden">
+<body class="bg-white font-an text-gray-700 overflow-x-hidden">
     <!-- 导航栏 -->
-    <header cla="fixed top-0 left-0 w-full bg-white/95 backdrop-blur-md z-50 hadow-m">
-        <div cla="container mx-auto px-4 md:px-8 py-4 flex jutify-between item-center">
+    <header class="fixed top-0 left-0 w-full bg-white/95 backdrop-blur-md z-50 shadow-md">
+        <div class="container mx-auto px-4 md:px-8 py-4 flex justify-between items-center">
             <!-- 替换为图片Logo，字体样式统一 -->
-            <a href="#" cla="h-10 flex item-center">
-                <img rc="images/TALLSI-logo.webp" alt="TALLSI" cla="h-10 object-contain">
+            <a href="#" class="h-10 flex items-center">
+                <img src="images/TALLSI-logo.webp" alt="TALLSI" class="h-10 object-contain">
             </a>
-            <nav cla="hidden md:flex gap-8 text-[15px]">
-                <a href="#home" cla="text-primary font-medium">首页</a>
-                <a href="#ervice" cla="hover:text-primary tranition-color">产品服务</a>
-                <a href="#cae" cla="hover:text-primary tranition-color">案例展示</a>
-                <a href="#about" cla="hover:text-primary tranition-color">关于我们</a>
-                <a href="#contact" cla="hover:text-primary tranition-color">联系我们</a>
+            <nav class="hidden md:flex gap-8 text-[15px]">
+                <a href="#home" class="text-primary font-medium">首页</a>
+                <a href="#service" class="hover:text-primary transition-colors">产品服务</a>
+                <a href="#case" class="hover:text-primary transition-colors">案例展示</a>
+                <a href="#about" class="hover:text-primary transition-colors">关于我们</a>
+                <a href="#contact" class="hover:text-primary transition-colors">联系我们</a>
             </nav>
-            <a href="#contact" cla="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-primary/90 tranition-color text-m">
+            <a href="#contact" class="bg-primary text-white px-5 py-2.5 rounded-lg hover:bg-primary/90 transition-colors text-sm">
                 立即咨询
             </a>
-            <button cla="md:hidden text-dark text-xl">
-                <i cla="fa fa-bar"></i>
+            <button id="menuBtn" class="md:hidden text-dark text-xl">
+                <i class="fa fa-bars"></i>
             </button>
+        </div>
+        <!-- 移动端导航菜单 -->
+        <div id="mobileMenu" class="hidden md:hidden absolute top-full left-0 w-full bg-white shadow-lg px-4 py-4">
+            <nav class="flex flex-col gap-4">
+                <a href="#home" class="text-primary font-medium py-2">首页</a>
+                <a href="#service" class="hover:text-primary transition-colors py-2">产品服务</a>
+                <a href="#case" class="hover:text-primary transition-colors py-2">案例展示</a>
+                <a href="#about" class="hover:text-primary transition-colors py-2">关于我们</a>
+                <a href="#contact" class="hover:text-primary transition-colors py-2">联系我们</a>
+            </nav>
         </div>
     </header>
 
     <!-- 首屏Banner -->
-    <ection id="home" cla="pt-[100px] bg-gradient-to-br from-graySoft to-white min-h-[650px] flex item-center">
-        <div cla="container mx-auto px-4 md:px-8 grid md:grid-col-2 gap-12 item-center">
+    <section id="home" class="pt-[100px] bg-gradient-to-br from-graySoft to-white min-h-[650px] flex items-center">
+        <div class="container mx-auto px-4 md:px-8 grid md:grid-cols-2 gap-12 items-center">
             <div>
-                <pan cla="inline-block bg-primary/10 text-primary px-3 py-1 rounded text-m mb-4">高端图文印刷 · 品牌视觉定制</pan>
-                <h1 cla="text-[42px] md:text-[56px] font-bold text-dark leading-tight mb-6">
+                <span class="inline-block bg-primary/10 text-primary px-3 py-1 rounded text-sm mb-4">高端图文印刷 · 品牌视觉定制</span>
+                <h1 class="text-[42px] md:text-[56px] font-bold text-dark leading-tight mb-6">
                     TALLSI 图文<br>
-                    <pan cla="text-gradient">一站式广告印刷解决方案</pan>
+                    <span class="text-gradient">一站式广告印刷解决方案</span>
                 </h1>
-                <p cla="text-gray-500 text-[17px] leading-relaxed mb-8 max-w-xl">
+                <p class="text-gray-500 text-[17px] leading-relaxed mb-8 max-w-xl">
                     商业印刷、画册海报、标书装订、门头广告、VI品牌设计、文创定制，精工出品，极速交付，为企业打造专业视觉物料。
                 </p>
-                <div cla="flex flex-wrap gap-4">
-                    <a href="#ervice" cla="bg-primary text-white px-7 py-3.5 rounded-lg hover:hadow-lg hover:hadow-primary/20 tranition-all">
+                <div class="flex flex-wrap gap-4">
+                    <a href="#service" class="bg-primary text-white px-7 py-3.5 rounded-lg hover:shadow-lg hover:shadow-primary/20 transition-all">
                         浏览全部产品
                     </a>
-                    <a href="#cae" cla="border border-primary text-primary px-7 py-3.5 rounded-lg hover:bg-primary/5 tranition-all">
+                    <a href="#case" class="border border-primary text-primary px-7 py-3.5 rounded-lg hover:bg-primary/5 transition-all">
                         查看精选案例
                     </a>
                 </div>
-                <div cla="flex gap-10 mt-10">
+                <div class="flex gap-10 mt-10">
                     <div>
-                        <h3 cla="text-[30px] font-bold text-dark">12+</h3>
-                        <p cla="text-gray-400">行业服务经验</p>
+                        <h3 class="text-[30px] font-bold text-dark">12+</h3>
+                        <p class="text-gray-400">行业服务经验</p>
                     </div>
                     <div>
-                        <h3 clas="text-[30px] font-bold text-dark">6000+</h3>
-                        <p clas="text-gray-400">企业合作客户</p>
+                        <h3 class="text-[30px] font-bold text-dark">6000+</h3>
+                        <p class="text-gray-400">企业合作客户</p>
                     </div>
                     <div>
-                        <h3 clas="text-[30px] font-bold text-dark">99.6%</h3>
-                        <p clas="text-gray-400">客户好评率</p>
+                        <h3 class="text-[30px] font-bold text-dark">99.6%</h3>
+                        <p class="text-gray-400">客户好评率</p>
                     </div>
                 </div>
             </div>
-            <div clas="rounded-2xl overflow-hidden shadow-card">
-                <img rc="images/banner.jpg" alt="图文印刷高端场景" clas="w-full h-full object-cover">
+            <div class="rounded-2xl overflow-hidden shadow-card">
+                <img src="images/banner.jpg" alt="图文印刷高端场景" class="w-full h-full object-cover">
             </div>
         </div>
     </section>
@@ -195,108 +209,108 @@
 
                 <!-- 产品6：平面设计服务 -->
                 <div class="bg-white rounded-xl p-7 shadow-card hover-scale">
-                    <div cla="w-14 h-14 bg-primary/10 rounded-lg flex item-center jutify-center text-primary text-2xl mb-6">
-                        <i cla="fa fa-paint-bruh"></i>
+                    <div class="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center text-primary text-2xl mb-6">
+                        <i class="fa fa-paint-brush"></i>
                     </div>
-                    <h3 cla="text-xl font-bold text-dark mb-3">专业视觉设计</h3>
-                    <p cla="text-gray-500 mb-5">LOGO设计、VI整套、海报宣传单、画册排版、包装设计、PPT美化、图片精修</p>
-                    <div cla="flex flex-wrap gap-2">
-                        <pan cla="bg-graySoft px-2.5 py-1 rounded text-x">品牌设计</pan>
-                        <pan cla="bg-graySoft px-2.5 py-1 rounded text-x">排版美工</pan>
-                        <pan cla="bg-graySoft px-2.5 py-1 rounded text-x">PPT定制</pan>
+                    <h3 class="text-xl font-bold text-dark mb-3">专业视觉设计</h3>
+                    <p class="text-gray-500 mb-5">LOGO设计、VI整套、海报宣传单、画册排版、包装设计、PPT美化、图片精修</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">品牌设计</span>
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">排版美工</span>
+                        <span class="bg-graySoft px-2.5 py-1 rounded text-xs">PPT定制</span>
                     </div>
                 </div>
             </div>
         </div>
-    </ection>
+    </section>
 
     <!-- 产品样例展示 -->
-    <ection id="cae" cla="py-24">
-        <div cla="container mx-auto px-4 md:px-8">
-            <div cla="text-center mb-16">
-                <pan cla="text-primary text-m font-medium">PRODUCT CASES</pan>
-                <h2 cla="text-[36px] font-bold text-dark mt-2 mb-4">精选产品样例</h2>
-                <p cla="text-gray-500 max-w-2xl mx-auto">实拍成品案例，多材质工艺可选，支持来图定制、免费设计打样</p>
+    <section id="case" class="py-24">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="text-center mb-16">
+                <span class="text-primary text-sm font-medium">PRODUCT CASES</span>
+                <h2 class="text-[36px] font-bold text-dark mt-2 mb-4">精选产品样例</h2>
+                <p class="text-gray-500 max-w-2xl mx-auto">实拍成品案例，多材质工艺可选，支持来图定制、免费设计打样</p>
             </div>
 
-            <div cla="grid m:grid-col-2 md:grid-col-3 lg:grid-col-4 gap-6">
-                <div cla="rounded-xl overflow-hidden hadow-card hover-cale">
-                    <img rc="images/企业精装画册.webp" cla="w-full h-[260px] object-cover" alt="企业精装画册">
-                    <div cla="p-4">
-                        <h4 cla="font-bold text-dark">企业精装宣传画册</h4>
-                        <p cla="text-gray-400 text-m mt-1">特种纸烫金工艺</p>
+            <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div class="rounded-xl overflow-hidden shadow-card hover-scale">
+                    <img src="images/企业精装画册.webp" class="w-full h-[260px] object-cover" alt="企业精装画册">
+                    <div class="p-4">
+                        <h4 class="font-bold text-dark">企业精装宣传画册</h4>
+                        <p class="text-gray-400 text-sm mt-1">特种纸烫金工艺</p>
                     </div>
                 </div>
-                <div cla="rounded-xl overflow-hidden hadow-card hover-cale">
-                    <img rc="images/高端商务名片.webp" cla="w-full h-[260px] object-cover" alt="高端商务名片">
-                    <div cla="p-4">
-                        <h4 cla="font-bold text-dark">特种纸商务名片</h4>
-                        <p cla="text-gray-400 text-m mt-1">烫银/凹凸工艺</p>
+                <div class="rounded-xl overflow-hidden shadow-card hover-scale">
+                    <img src="images/高端商务名片.webp" class="w-full h-[260px] object-cover" alt="高端商务名片">
+                    <div class="p-4">
+                        <h4 class="font-bold text-dark">特种纸商务名片</h4>
+                        <p class="text-gray-400 text-sm mt-1">烫银/凹凸工艺</p>
                     </div>
                 </div>
-                <div cla="rounded-xl overflow-hidden hadow-card hover-cale">
-                    <img rc="images/活动易拉宝展架.webp" cla="w-full h-[260px] object-cover" alt="活动易拉宝展架">
-                    <div cla="p-4">
-                        <h4 cla="font-bold text-dark">高清易拉宝展架</h4>
-                        <p cla="text-gray-400 text-m mt-1">防水防晒材质</p>
+                <div class="rounded-xl overflow-hidden shadow-card hover-scale">
+                    <img src="images/活动易拉宝展架.webp" class="w-full h-[260px] object-cover" alt="活动易拉宝展架">
+                    <div class="p-4">
+                        <h4 class="font-bold text-dark">高清易拉宝展架</h4>
+                        <p class="text-gray-400 text-sm mt-1">防水防晒材质</p>
                     </div>
                 </div>
-                <div cla="rounded-xl overflow-hidden hadow-card hover-cale">
-                    <img rc="images/企业手提纸袋.webp" cla="w-full h-[260px] object-cover" alt="企业手提纸袋">
-                    <div cla="p-4">
-                        <h4 cla="font-bold text-dark">牛皮纸手提袋</h4>
-                        <p cla="text-gray-400 text-m mt-1">多尺寸可定制</p>
+                <div class="rounded-xl overflow-hidden shadow-card hover-scale">
+                    <img src="images/企业手提纸袋.webp" class="w-full h-[260px] object-cover" alt="企业手提纸袋">
+                    <div class="p-4">
+                        <h4 class="font-bold text-dark">牛皮纸手提袋</h4>
+                        <p class="text-gray-400 text-sm mt-1">多尺寸可定制</p>
                     </div>
                 </div>
-                <div cla="rounded-xl overflow-hidden hadow-card hover-cale">
-                    <img rc="images/热熔精装标书.webp" cla="w-full h-[260px] object-cover" alt="热熔精装标书">
-                    <div cla="p-4">
-                        <h4 cla="font-bold text-dark">热熔精装投标文件</h4>
-                        <p cla="text-gray-400 text-m mt-1">标书专业封装</p>
+                <div class="rounded-xl overflow-hidden shadow-card hover-scale">
+                    <img src="images/热熔精装标书.webp" class="w-full h-[260px] object-cover" alt="热熔精装标书">
+                    <div class="p-4">
+                        <h4 class="font-bold text-dark">热熔精装投标文件</h4>
+                        <p class="text-gray-400 text-sm mt-1">标书专业封装</p>
                     </div>
                 </div>
-                <div cla="rounded-xl overflow-hidden hadow-card hover-cale">
-                    <img rc="images/企业文化形象墙.webp" cla="w-full h-[260px] object-cover" alt="企业文化形象墙">
-                    <div cla="p-4">
-                        <h4 cla="font-bold text-dark">企业文化形象墙</h4>
-                        <p cla="text-gray-400 text-m mt-1">亚克力精工雕刻</p>
+                <div class="rounded-xl overflow-hidden shadow-card hover-scale">
+                    <img src="images/企业文化形象墙.webp" class="w-full h-[260px] object-cover" alt="企业文化形象墙">
+                    <div class="p-4">
+                        <h4 class="font-bold text-dark">企业文化形象墙</h4>
+                        <p class="text-gray-400 text-sm mt-1">亚克力精工雕刻</p>
                     </div>
                 </div>
-                <div cla="rounded-xl overflow-hidden hadow-card hover-cale">
-                    <img rc="images/宣传单三折页.webp" cla="w-full h-[260px] object-cover" alt="宣传单三折页">
-                    <div cla="p-4">
-                        <h4 cla="font-bold text-dark">三折页宣传单</h4>
-                        <p cla="text-gray-400 text-m mt-1">157g铜版纸双面彩印</p>
+                <div class="rounded-xl overflow-hidden shadow-card hover-scale">
+                    <img src="images/宣传单三折页.webp" class="w-full h-[260px] object-cover" alt="宣传单三折页">
+                    <div class="p-4">
+                        <h4 class="font-bold text-dark">三折页宣传单</h4>
+                        <p class="text-gray-400 text-sm mt-1">157g铜版纸双面彩印</p>
                     </div>
                 </div>
-                <div cla="rounded-xl overflow-hidden hadow-card hover-cale">
-                    <img rc="images/不干胶标签贴纸.webp" cla="w-full h-[260px] object-cover" alt="不干胶标签贴纸">
-                    <div cla="p-4">
-                        <h4 cla="font-bold text-dark">彩色不干胶标签</h4>
-                        <p cla="text-gray-400 text-m mt-1">防水可移材质</p>
+                <div class="rounded-xl overflow-hidden shadow-card hover-scale">
+                    <img src="images/不干胶标签贴纸.webp" class="w-full h-[260px] object-cover" alt="不干胶标签贴纸">
+                    <div class="p-4">
+                        <h4 class="font-bold text-dark">彩色不干胶标签</h4>
+                        <p class="text-gray-400 text-sm mt-1">防水可移材质</p>
                     </div>
                 </div>
             </div>
         </div>
-    </ection>
+    </section>
 
     <!-- 关于我们 -->
-    <ection id="about" cla="py-24 bg-graySoft">
-        <div cla="container mx-auto px-4 md:px-8 grid md:grid-col-2 gap-12 item-center">
-            <div cla="rounded-2xl overflow-hidden hadow-card">
-                <img rc="image/about.jpg" alt="TALLSI图文门店车间" cla="w-full">
+    <section id="about" class="py-24 bg-graySoft">
+        <div class="container mx-auto px-4 md:px-8 grid md:grid-cols-2 gap-12 items-center">
+            <div class="rounded-2xl overflow-hidden shadow-card">
+                <img src="images/about.jpg" alt="TALLSI图文门店车间" class="w-full">
             </div>
             <div>
-                <pan cla="text-primary text-m font-medium">ABOUT TALLSI</pan>
-                <h2 cla="text-[36px] font-bold text-dark mt-2 mb-6">关于 TALLSI 图文</h2>
-                <p cla="text-gray-500 leading-relaxed mb-5">
+                <span class="text-primary text-sm font-medium">ABOUT TALLSI</span>
+                <h2 class="text-[36px] font-bold text-dark mt-2 mb-6">关于 TALLSI 图文</h2>
+                <p class="text-gray-500 leading-relaxed mb-5">
                     TALLSI图文专注于企业商业图文广告全链路服务，集创意设计、高清印刷、广告制作、安装落地于一体。配备全新数码印刷机、大型喷绘写真设备、精装装订生产线，严格把控每一道工艺。
                 </p>
-                <p cla="text-gray-500 leading-relaxed mb-8">
+                <p class="text-gray-500 leading-relaxed mb-8">
                     我们坚持高性价比+精工品质，支持急单加急交付，提供一对一设计师对接服务，已为数千家政企、中小企业、门店商家提供稳定可靠的图文物料解决方案。
                 </p>
-                <div cla="grid grid-col-2 gap-5">
-                    <div cla="bg-white p-4 rounded-lg hadow-m">
+                <div class="grid grid-cols-2 gap-5">
+                    <div class="bg-white p-4 rounded-lg shadow-sm">
                         <i class="fa fa-check-circle text-primary text-lg"></i>
                         <span class="ml-2 font-medium">原厂环保纸张油墨</span>
                     </div>
@@ -346,7 +360,7 @@
     </section>
 
     <!-- 页脚 -->
-    <footer class="bg-[111827] py-8 text-center text-gray-400 text-sm">
+    <footer class="bg-[#111827] py-8 text-center text-gray-400 text-sm">
         <div class="container mx-auto px-4">
             <h3 class="text-white text-xl font-bold tracking-wider mb-3">TALLSI 图文广告</h3>
             <p>© 2026 TALLSI All Rights Reserved. 一站式图文印刷广告服务商</p>
@@ -357,5 +371,20 @@
     <a href="#home" class="fixed bottom-8 right-8 w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center shadow-lg hover:bg-primary/90 transition-all">
         <i class="fa fa-arrow-up"></i>
     </a>
+
+    <!-- 移动端菜单交互JS -->
+    <script>
+        const menuBtn = document.getElementById('menuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        // 点击导航链接自动关闭移动端菜单
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            })
+        })
+    </script>
 </body>
 </html>
